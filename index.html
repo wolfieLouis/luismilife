@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0a0a0f" />
   <meta name="description" content="LuismiLife - Tu gestor de vida personal" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="LuismiLife" />
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
@@ -15,14 +18,14 @@
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/components.css" />
 
-  <!-- Iconos -->
+  <!-- Iconos Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <title>LuismiLife</title>
 </head>
 <body>
 
-  <!-- ========== OVERLAY (fondo oscuro al abrir sidebar) ========== -->
+  <!-- ========== OVERLAY ========== -->
   <div class="overlay" id="overlay"></div>
 
   <!-- ========== SIDEBAR ========== -->
@@ -104,9 +107,8 @@
     <!-- CONTENIDO DE PÁGINAS -->
     <main class="content" id="content">
 
-      <!-- Cada módulo se cargará aquí dinámicamente -->
       <div id="page-dashboard" class="page active">
-        <p class="loading-text">Cargando dashboard...</p>
+        <p class="loading-text">Cargando...</p>
       </div>
 
       <div id="page-spiritual" class="page">
@@ -145,7 +147,7 @@
 
   </div>
 
-  <!-- ========== MODAL GLOBAL (para formularios CRUD) ========== -->
+  <!-- ========== MODAL GLOBAL ========== -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal" id="modal">
       <div class="modal-header">
@@ -154,17 +156,34 @@
           <i class="fa fa-times"></i>
         </button>
       </div>
-      <div class="modal-body" id="modalBody">
-        <!-- Contenido dinámico -->
-      </div>
+      <div class="modal-body" id="modalBody"></div>
     </div>
   </div>
 
-  <!-- ========== TOAST (notificaciones) ========== -->
+  <!-- ========== TOAST ========== -->
   <div class="toast" id="toast">
     <i class="fa fa-check-circle"></i>
     <span id="toastMsg">Guardado correctamente</span>
   </div>
+
+  <!-- ========== BOTÓN FLOTANTE PWA ========== -->
+  <button id="pwaFab" onclick="installPWA()"
+    style="display:none;position:fixed;bottom:5rem;right:1.2rem;z-index:900;
+      background:linear-gradient(135deg,#7c3aed,#06b6d4);
+      color:#fff;border:none;border-radius:50px;
+      padding:0.7rem 1.2rem;font-size:0.85rem;font-weight:700;
+      cursor:pointer;align-items:center;gap:8px;
+      box-shadow:0 0 20px #7c3aed88;
+      animation:pwaPulse 2s infinite">
+    📲 Instalar app
+  </button>
+
+  <style>
+    @keyframes pwaPulse {
+      0%,100% { box-shadow: 0 0 20px #7c3aed88; }
+      50%      { box-shadow: 0 0 35px #7c3aedcc; }
+    }
+  </style>
 
   <!-- ========== SUPABASE CDN ========== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -180,10 +199,12 @@
   <script src="js/goals.js"></script>
   <script src="js/reminders.js"></script>
 
-  <!-- PWA Service Worker -->
+  <!-- ========== PWA SERVICE WORKER ========== -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('✅ Service Worker registrado'))
+        .catch(e => console.log('❌ SW error:', e));
     }
   </script>
 
