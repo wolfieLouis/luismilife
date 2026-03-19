@@ -200,13 +200,17 @@
   <script src="js/reminders.js"></script>
 
   <!-- ========== PWA SERVICE WORKER ========== -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js')
-        .then(() => console.log('✅ Service Worker registrado'))
-        .catch(e => console.log('❌ SW error:', e));
-    }
-  </script>
+
+
+<button id="pwaInstallBtn" onclick="installPWA()"
+  style="display:none;position:fixed;bottom:1.5rem;right:1.2rem;z-index:900;
+    background:linear-gradient(135deg,#7c3aed,#06b6d4);
+    color:#fff;border:none;border-radius:50px;
+    padding:0.75rem 1.4rem;font-size:0.88rem;font-weight:700;
+    cursor:pointer;align-items:center;gap:8px;
+    box-shadow:0 4px 20px #7c3aed88;">
+  📲 Instalar app
+</button>
 
 </body>
 </html>
