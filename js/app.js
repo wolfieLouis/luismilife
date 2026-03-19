@@ -51,33 +51,19 @@ const pageTitles = {
 let currentPage = '';
 
 function navigateTo(page) {
-  // Ocultar todas las páginas
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-
-  // Mostrar página seleccionada
   const next = document.getElementById('page-' + page);
   if (next) next.classList.add('active');
-
-  // Actualizar título topbar
   pageTitle.textContent = pageTitles[page] || page;
-
-  // Actualizar nav activo
   document.querySelectorAll('.nav-item[data-page]').forEach(item => {
     item.classList.toggle('active', item.dataset.page === page);
   });
-
-  // Guardar página actual
   currentPage = page;
   localStorage.setItem('lastPage', page);
-
-  // Cerrar sidebar en móvil
   if (window.innerWidth < 1024) closeSidebar();
-
-  // Cargar contenido del módulo
   loadPage(page);
 }
 
-// Asignar click a cada item del nav
 document.addEventListener('click', e => {
   const navItem = e.target.closest('.nav-item[data-page]');
   if (navItem) {
@@ -86,7 +72,6 @@ document.addEventListener('click', e => {
   }
 });
 
-// Cargar el módulo según la página
 function loadPage(page) {
   switch (page) {
     case 'dashboard':  renderDashboard();  break;
@@ -110,16 +95,16 @@ function setDate() {
 
 /* ---- VERSÍCULOS DEL DÍA ---- */
 const verses = [
-  { text: '"Todo lo puedo en Cristo que me fortalece."', ref: '— Filipenses 4:13' },
-  { text: '"Porque yo sé los planes que tengo para vosotros..."', ref: '— Jeremías 29:11' },
-  { text: '"El Señor es mi pastor, nada me faltará."', ref: '— Salmos 23:1' },
-  { text: '"Confía en el Señor con todo tu corazón."', ref: '— Proverbios 3:5' },
-  { text: '"Buscad primero el reino de Dios..."', ref: '— Mateo 6:33' },
-  { text: '"El Señor peleará por vosotros."', ref: '— Éxodo 14:14' },
-  { text: '"Esfuérzate y sé valiente."', ref: '— Josué 1:9' },
-  { text: '"Con Dios haremos proezas."', ref: '— Salmos 60:12' },
-  { text: '"El amor de Dios ha sido derramado en nuestros corazones."', ref: '— Romanos 5:5' },
-  { text: '"El que comenzó en vosotros la buena obra, la perfeccionará."', ref: '— Filipenses 1:6' },
+  { text: '"Todo lo puedo en Cristo que me fortalece."',                          ref: '— Filipenses 4:13' },
+  { text: '"Porque yo sé los planes que tengo para vosotros..."',                 ref: '— Jeremías 29:11' },
+  { text: '"El Señor es mi pastor, nada me faltará."',                            ref: '— Salmos 23:1' },
+  { text: '"Confía en el Señor con todo tu corazón."',                            ref: '— Proverbios 3:5' },
+  { text: '"Buscad primero el reino de Dios..."',                                 ref: '— Mateo 6:33' },
+  { text: '"El Señor peleará por vosotros."',                                     ref: '— Éxodo 14:14' },
+  { text: '"Esfuérzate y sé valiente."',                                          ref: '— Josué 1:9' },
+  { text: '"Con Dios haremos proezas."',                                           ref: '— Salmos 60:12' },
+  { text: '"El amor de Dios ha sido derramado en nuestros corazones."',           ref: '— Romanos 5:5' },
+  { text: '"El que comenzó en vosotros la buena obra, la perfeccionará."',        ref: '— Filipenses 1:6' },
 ];
 
 function setDailyVerse() {
@@ -144,6 +129,22 @@ function renderSettings() {
         Tu gestor de vida personal — Espiritual, Económica, Académica y Fitness.
       </p>
     </div>
+
+    <!-- PWA INSTALL -->
+    <div class="card mb-2">
+      <h4 class="mb-1">📲 Instalar app</h4>
+      <p class="text-muted" style="font-size:0.82rem;margin-bottom:12px">
+        Instala LuismiLife en tu pantalla de inicio para usarla sin internet.
+      </p>
+      <button id="pwaInstallBtn" class="btn btn-primary" onclick="installPWA()"
+        style="display:block;width:100%">
+        📲 Instalar LuismiLife
+      </button>
+      <p id="pwaInstalledMsg" style="display:none;color:#4ade80;font-size:0.82rem;margin-top:8px">
+        ✅ Usa el menú ⋮ → "Añadir a pantalla de inicio"
+      </p>
+    </div>
+
     <div class="card mb-2">
       <h4 class="mb-1">🗄️ Supabase</h4>
       <div class="input-group">
@@ -180,6 +181,14 @@ function renderSettings() {
       <p class="text-muted" style="font-size:0.85rem">LuismiLife v1.0 — Hecho con 💜 y fe.</p>
     </div>
   `;
+
+  // Verificar si el prompt está disponible
+  const btn = document.getElementById('pwaInstallBtn');
+  const msg = document.getElementById('pwaInstalledMsg');
+  if (!window._pwaPrompt) {
+    btn.style.display = 'none';
+    msg.style.display = 'block';
+  }
 }
 
 function saveSupabaseConfig() {
@@ -198,7 +207,7 @@ function handleImport(e) {
   const reader = new FileReader();
   reader.onload = ev => DB.importAll(ev.target.result);
   reader.readAsText(file);
-  }
+}
 /* =============================================
    LuismiLife — app.js (Parte 2)
    Modal global, Toast, Dashboard, PWA, Init
@@ -245,33 +254,18 @@ function showToast(msg, type = 'success') {
 }
 
 /* ---- PWA INSTALL ---- */
-let deferredPrompt = null;
-
-// 1. Captura el evento — solo Android/Chrome lo dispara
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  // Mostrar botón de instalar
-  const btn = document.getElementById('pwaInstallBtn');
-  if (btn) btn.style.display = 'flex';
-});
-
-// 2. Cuando ya está instalada — ocultar botón
-window.addEventListener('appinstalled', () => {
-  deferredPrompt = null;
-  const btn = document.getElementById('pwaInstallBtn');
-  if (btn) btn.style.display = 'none';
-  showToast('🎉 ¡LuismiLife instalada!');
-});
+// Usa window._pwaPrompt capturado en el <head> del HTML
+// NO duplicamos el listener beforeinstallprompt aquí
 
 async function installPWA() {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  if (outcome === 'accepted') {
-    showToast('🎉 ¡Instalando LuismiLife!');
+  if (!window._pwaPrompt) {
+    showToast('Usa el menú ⋮ → Añadir a pantalla de inicio', 'error');
+    return;
   }
-  deferredPrompt = null;
+  window._pwaPrompt.prompt();
+  const { outcome } = await window._pwaPrompt.userChoice;
+  if (outcome === 'accepted') showToast('🎉 ¡Instalando LuismiLife!');
+  window._pwaPrompt = null;
   const btn = document.getElementById('pwaInstallBtn');
   if (btn) btn.style.display = 'none';
 }
