@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="LuismiLife" />
 
-  <!-- PWA -->
+  <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
 
@@ -18,10 +18,34 @@
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/components.css" />
 
-  <!-- Iconos Font Awesome -->
+  <!-- Iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <title>LuismiLife</title>
+
+  <!-- PWA: capturar evento ANTES de que todo cargue -->
+  <script>
+    window._pwaPrompt = null;
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      window._pwaPrompt = e;
+      const btn = document.getElementById('install-btn');
+      if (btn) btn.style.display = 'block';
+    });
+    window.addEventListener('appinstalled', () => {
+      window._pwaPrompt = null;
+      const btn = document.getElementById('install-btn');
+      if (btn) btn.style.display = 'none';
+    });
+  </script>
+
+  <!-- Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+
 </head>
 <body>
 
@@ -86,6 +110,23 @@
         <i class="fa fa-cog"></i>
         <span>Ajustes</span>
       </a>
+
+      <!-- Botón instalar PWA — aparece solo si es instalable -->
+      <button id="install-btn" onclick="
+        if(window._pwaPrompt){
+          window._pwaPrompt.prompt();
+          window._pwaPrompt.userChoice.then(()=>{
+            window._pwaPrompt=null;
+            document.getElementById('install-btn').style.display='none';
+          });
+        }
+      " style="display:none;width:100%;margin-top:8px;padding:0.7rem 1rem;
+        border:1.5px solid #7c3aed88;border-radius:10px;
+        background:transparent;color:#a78bfa;font-size:0.85rem;
+        cursor:pointer;font-weight:600;transition:all 0.2s;">
+        📲 Instalar app
+      </button>
+
     </div>
 
   </aside>
@@ -104,44 +145,20 @@
       </div>
     </header>
 
-    <!-- CONTENIDO DE PÁGINAS -->
+    <!-- CONTENIDO -->
     <main class="content" id="content">
 
       <div id="page-dashboard" class="page active">
         <p class="loading-text">Cargando...</p>
       </div>
-
-      <div id="page-spiritual" class="page">
-        <p class="loading-text">Cargando módulo espiritual...</p>
-      </div>
-
-      <div id="page-economic" class="page">
-        <p class="loading-text">Cargando módulo económico...</p>
-      </div>
-
-      <div id="page-academic" class="page">
-        <p class="loading-text">Cargando módulo académico...</p>
-      </div>
-
-      <div id="page-fitness" class="page">
-        <p class="loading-text">Cargando módulo fitness...</p>
-      </div>
-
-      <div id="page-notes" class="page">
-        <p class="loading-text">Cargando módulo notas...</p>
-      </div>
-
-      <div id="page-goals" class="page">
-        <p class="loading-text">Cargando módulo metas...</p>
-      </div>
-
-      <div id="page-reminders" class="page">
-        <p class="loading-text">Cargando módulo recordatorios...</p>
-      </div>
-
-      <div id="page-settings" class="page">
-        <p class="loading-text">Cargando ajustes...</p>
-      </div>
+      <div id="page-spiritual" class="page"></div>
+      <div id="page-economic" class="page"></div>
+      <div id="page-academic" class="page"></div>
+      <div id="page-fitness" class="page"></div>
+      <div id="page-notes" class="page"></div>
+      <div id="page-goals" class="page"></div>
+      <div id="page-reminders" class="page"></div>
+      <div id="page-settings" class="page"></div>
 
     </main>
 
@@ -166,26 +183,7 @@
     <span id="toastMsg">Guardado correctamente</span>
   </div>
 
-  <!-- ========== BOTÓN FLOTANTE PWA ========== -->
-  <button id="pwaFab" onclick="installPWA()"
-    style="display:none;position:fixed;bottom:5rem;right:1.2rem;z-index:900;
-      background:linear-gradient(135deg,#7c3aed,#06b6d4);
-      color:#fff;border:none;border-radius:50px;
-      padding:0.7rem 1.2rem;font-size:0.85rem;font-weight:700;
-      cursor:pointer;align-items:center;gap:8px;
-      box-shadow:0 0 20px #7c3aed88;
-      animation:pwaPulse 2s infinite">
-    📲 Instalar app
-  </button>
-
-  <style>
-    @keyframes pwaPulse {
-      0%,100% { box-shadow: 0 0 20px #7c3aed88; }
-      50%      { box-shadow: 0 0 35px #7c3aedcc; }
-    }
-  </style>
-
-  <!-- ========== SUPABASE CDN ========== -->
+  <!-- ========== SUPABASE ========== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- ========== JS ========== -->
@@ -198,19 +196,6 @@
   <script src="js/notes.js"></script>
   <script src="js/goals.js"></script>
   <script src="js/reminders.js"></script>
-
-  <!-- ========== PWA SERVICE WORKER ========== -->
-
-
-<button id="pwaInstallBtn" onclick="installPWA()"
-  style="display:none;position:fixed;bottom:1.5rem;right:1.2rem;z-index:900;
-    background:linear-gradient(135deg,#7c3aed,#06b6d4);
-    color:#fff;border:none;border-radius:50px;
-    padding:0.75rem 1.4rem;font-size:0.88rem;font-weight:700;
-    cursor:pointer;align-items:center;gap:8px;
-    box-shadow:0 4px 20px #7c3aed88;">
-  📲 Instalar app
-</button>
 
 </body>
 </html>
