@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <meta name="description" content="LuismiLife - Tu gestor de vida personal" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+
+  <!-- Iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <title>LuismiLife</title>
+</head>
+<body>
+
+  <!-- ========== OVERLAY (fondo oscuro al abrir sidebar) ========== -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">LuismiLife</span>
+      </div>
+      <button class="sidebar-close" id="sidebarClose">
+        <i class="fa fa-times"></i>
+      </button>
+    </div>
+
+    <div class="sidebar-verse">
+      <p id="verseText">"Todo lo puedo en Cristo que me fortalece."</p>
+      <span id="verseRef">— Filipenses 4:13</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-page="dashboard">
+        <i class="fa fa-home"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" data-page="spiritual">
+        <i class="fa fa-cross"></i>
+        <span>Espiritual</span>
+      </a>
+      <a href="#" class="nav-item" data-page="economic">
+        <i class="fa fa-dollar-sign"></i>
+        <span>Económica</span>
+      </a>
+      <a href="#" class="nav-item" data-page="academic">
+        <i class="fa fa-book"></i>
+        <span>Académica</span>
+      </a>
+      <a href="#" class="nav-item" data-page="fitness">
+        <i class="fa fa-dumbbell"></i>
+        <span>Fitness</span>
+      </a>
+      <a href="#" class="nav-item" data-page="notes">
+        <i class="fa fa-sticky-note"></i>
+        <span>Notas</span>
+      </a>
+      <a href="#" class="nav-item" data-page="goals">
+        <i class="fa fa-bullseye"></i>
+        <span>Metas</span>
+      </a>
+      <a href="#" class="nav-item" data-page="reminders">
+        <i class="fa fa-bell"></i>
+        <span>Recordatorios</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="#" class="nav-item" data-page="settings">
+        <i class="fa fa-cog"></i>
+        <span>Ajustes</span>
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ========== LAYOUT PRINCIPAL ========== -->
+  <div class="main-wrapper">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn">
+        <i class="fa fa-bars"></i>
+      </button>
+      <h1 class="page-title" id="pageTitle">Dashboard</h1>
+      <div class="topbar-right">
+        <span class="topbar-date" id="topbarDate"></span>
+      </div>
+    </header>
+
+    <!-- CONTENIDO DE PÁGINAS -->
+    <main class="content" id="content">
+
+      <!-- Cada módulo se cargará aquí dinámicamente -->
+      <div id="page-dashboard" class="page active">
+        <p class="loading-text">Cargando dashboard...</p>
+      </div>
+
+      <div id="page-spiritual" class="page">
+        <p class="loading-text">Cargando módulo espiritual...</p>
+      </div>
+
+      <div id="page-economic" class="page">
+        <p class="loading-text">Cargando módulo económico...</p>
+      </div>
+
+      <div id="page-academic" class="page">
+        <p class="loading-text">Cargando módulo académico...</p>
+      </div>
+
+      <div id="page-fitness" class="page">
+        <p class="loading-text">Cargando módulo fitness...</p>
+      </div>
+
+      <div id="page-notes" class="page">
+        <p class="loading-text">Cargando módulo notas...</p>
+      </div>
+
+      <div id="page-goals" class="page">
+        <p class="loading-text">Cargando módulo metas...</p>
+      </div>
+
+      <div id="page-reminders" class="page">
+        <p class="loading-text">Cargando módulo recordatorios...</p>
+      </div>
+
+      <div id="page-settings" class="page">
+        <p class="loading-text">Cargando ajustes...</p>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- ========== MODAL GLOBAL (para formularios CRUD) ========== -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Título</h2>
+        <button class="modal-close" id="modalClose">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Contenido dinámico -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TOAST (notificaciones) ========== -->
+  <div class="toast" id="toast">
+    <i class="fa fa-check-circle"></i>
+    <span id="toastMsg">Guardado correctamente</span>
+  </div>
+
+  <!-- ========== SUPABASE CDN ========== -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- ========== JS ========== -->
+  <script src="js/db.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/spiritual.js"></script>
+  <script src="js/economic.js"></script>
+  <script src="js/academic.js"></script>
+  <script src="js/fitness.js"></script>
+  <script src="js/notes.js"></script>
+  <script src="js/goals.js"></script>
+  <script src="js/reminders.js"></script>
+
+  <!-- PWA Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+
+</body>
+</html>
