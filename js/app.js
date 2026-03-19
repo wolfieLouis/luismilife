@@ -10,7 +10,6 @@ const menuBtn      = document.getElementById('menuBtn');
 const sidebarClose = document.getElementById('sidebarClose');
 const pageTitle    = document.getElementById('pageTitle');
 const topbarDate   = document.getElementById('topbarDate');
-const navItems     = document.querySelectorAll('.nav-item[data-page]');
 
 /* ---- SIDEBAR: ABRIR / CERRAR ---- */
 function openSidebar() {
@@ -29,7 +28,6 @@ menuBtn.addEventListener('click', openSidebar);
 sidebarClose.addEventListener('click', closeSidebar);
 overlay.addEventListener('click', closeSidebar);
 
-// Cerrar sidebar con tecla ESC
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeSidebar();
@@ -50,44 +48,42 @@ const pageTitles = {
   settings:   '⚙️ Ajustes',
 };
 
-let currentPage = 'dashboard';
+let currentPage = '';
 
 function navigateTo(page) {
-  // Ocultar página actual
-  const prev = document.getElementById(`page-${currentPage}`);
-  if (prev) prev.classList.remove('active');
+  // Ocultar todas las páginas
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
 
-  // Mostrar nueva página
-  const next = document.getElementById(`page-${page}`);
+  // Mostrar página seleccionada
+  const next = document.getElementById('page-' + page);
   if (next) next.classList.add('active');
 
-  // Actualizar título
+  // Actualizar título topbar
   pageTitle.textContent = pageTitles[page] || page;
 
   // Actualizar nav activo
-  navItems.forEach(item => {
+  document.querySelectorAll('.nav-item[data-page]').forEach(item => {
     item.classList.toggle('active', item.dataset.page === page);
   });
 
   // Guardar página actual
   currentPage = page;
+  localStorage.setItem('lastPage', page);
 
   // Cerrar sidebar en móvil
   if (window.innerWidth < 1024) closeSidebar();
-
-  // Guardar última página visitada
-  localStorage.setItem('lastPage', page);
 
   // Cargar contenido del módulo
   loadPage(page);
 }
 
 // Asignar click a cada item del nav
-navItems.forEach(item => {
-  item.addEventListener('click', e => {
+document.addEventListener('click', e => {
+  const navItem = e.target.closest('.nav-item[data-page]');
+  if (navItem) {
     e.preventDefault();
-    navigateTo(item.dataset.page);
-  });
+    navigateTo(navItem.dataset.page);
+  }
 });
 
 // Cargar el módulo según la página
@@ -107,7 +103,7 @@ function loadPage(page) {
 
 /* ---- FECHA EN TOPBAR ---- */
 function setDate() {
-  const now = new Date();
+  const now  = new Date();
   const opts = { weekday: 'short', day: 'numeric', month: 'short' };
   topbarDate.textContent = now.toLocaleDateString('es-ES', opts);
 }
@@ -128,14 +124,14 @@ const verses = [
 
 function setDailyVerse() {
   const idx = new Date().getDate() % verses.length;
-  const v = verses[idx];
-  const el = document.getElementById('verseText');
+  const v   = verses[idx];
+  const el  = document.getElementById('verseText');
   const ref = document.getElementById('verseRef');
   if (el)  el.textContent  = v.text;
   if (ref) ref.textContent = v.ref;
 }
 
-/* ---- SETTINGS básico ---- */
+/* ---- SETTINGS ---- */
 function renderSettings() {
   const el = document.getElementById('page-settings');
   el.innerHTML = `
@@ -143,7 +139,7 @@ function renderSettings() {
       <h2 class="section-title">⚙️ Ajustes</h2>
     </div>
     <div class="card mb-2">
-      <h3 class="mb-1" style="color:var(--color-spiritual)">✝️ LuismiLife</h3>
+      <h3 class="mb-1" style="color:var(--color-spiritual)">⚡ LuismiLife</h3>
       <p class="text-muted" style="font-size:0.85rem">
         Tu gestor de vida personal — Espiritual, Económica, Académica y Fitness.
       </p>
@@ -152,17 +148,32 @@ function renderSettings() {
       <h4 class="mb-1">🗄️ Supabase</h4>
       <div class="input-group">
         <label>URL del proyecto</label>
-        <input class="input" id="sbUrl" type="text" placeholder="https://xxxx.supabase.co"
+        <input class="input" id="sbUrl" type="text"
+          placeholder="https://xxxx.supabase.co"
           value="${localStorage.getItem('sb_url') || ''}" />
       </div>
       <div class="input-group">
         <label>Anon Key</label>
-        <input class="input" id="sbKey" type="password" placeholder="eyJ..."
+        <input class="input" id="sbKey" type="password"
+          placeholder="eyJ..."
           value="${localStorage.getItem('sb_key') || ''}" />
       </div>
       <button class="btn btn-primary" onclick="saveSupabaseConfig()">
         <i class="fa fa-save"></i> Guardar configuración
       </button>
+    </div>
+    <div class="card mb-2">
+      <h4 class="mb-1">💾 Mis datos</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="DB.exportAll()">
+          <i class="fa fa-download"></i> Exportar backup
+        </button>
+        <label class="btn btn-ghost" style="cursor:pointer">
+          <i class="fa fa-upload"></i> Importar backup
+          <input type="file" accept=".json" style="display:none"
+            onchange="handleImport(event)" />
+        </label>
+      </div>
     </div>
     <div class="card">
       <h4 class="mb-1">ℹ️ Versión</h4>
@@ -177,9 +188,17 @@ function saveSupabaseConfig() {
   if (!url || !key) { showToast('Completa ambos campos', 'error'); return; }
   localStorage.setItem('sb_url', url);
   localStorage.setItem('sb_key', key);
-  showToast('✅ Configuración guardada. Recarga la app.');
+  showToast('✅ Configuración guardada. Recargando...');
   setTimeout(() => location.reload(), 1500);
 }
+
+function handleImport(e) {
+  const file   = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => DB.importAll(ev.target.result);
+  reader.readAsText(file);
+  }
 /* =============================================
    LuismiLife — app.js (Parte 2)
    Modal global, Toast, Dashboard, Init
@@ -193,7 +212,7 @@ const modalClose   = document.getElementById('modalClose');
 
 function openModal(title, bodyHTML) {
   modalTitle.textContent = title;
-  modalBody.innerHTML = bodyHTML;
+  modalBody.innerHTML    = bodyHTML;
   modalOverlay.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
@@ -215,7 +234,7 @@ const toastMsg = document.getElementById('toastMsg');
 let toastTimer = null;
 
 function showToast(msg, type = 'success') {
-  toastMsg.textContent = msg;
+  toastMsg.textContent    = msg;
   toastEl.style.borderColor = type === 'error' ? '#f87171' : 'var(--neon-green)';
   toastEl.style.color       = type === 'error' ? '#f87171' : 'var(--neon-green)';
   toastEl.style.boxShadow   = type === 'error'
@@ -230,40 +249,35 @@ async function renderDashboard() {
   const el = document.getElementById('page-dashboard');
   el.innerHTML = `<p class="loading-text"><i class="fa fa-spinner fa-spin"></i> Cargando...</p>`;
 
-  // Traer conteos desde Supabase (o mostrar 0 si no hay conexión)
-  let spiritual = 0, transactions = 0, tasks = 0, workouts = 0;
+  // Conteos locales
+  const spiritual    = DB.spiritual.getAll().length;
+  const transactions = DB.economic.getAll().length;
+  const tasks        = DB.academic.getTasks().length;
+  const workouts     = DB.fitness.getWorkouts().length;
 
-  try {
-    if (window._sb) {
-      const [s, t, a, f] = await Promise.all([
-        window._sb.from('spiritual_entries').select('id', { count: 'exact', head: true }),
-        window._sb.from('transactions').select('id', { count: 'exact', head: true }),
-        window._sb.from('academic_tasks').select('id', { count: 'exact', head: true }),
-        window._sb.from('workouts').select('id', { count: 'exact', head: true }),
-      ]);
-      spiritual    = s.count || 0;
-      transactions = t.count || 0;
-      tasks        = a.count || 0;
-      workouts     = f.count || 0;
-    }
-  } catch (_) {}
+  const now     = new Date();
+  const hora    = now.getHours();
+  const greeting = hora < 12 ? '¡Buenos días'
+                 : hora < 18 ? '¡Buenas tardes'
+                 : '¡Buenas noches';
 
-  const now  = new Date();
-  const hora = now.getHours();
-  const greeting = hora < 12 ? '¡Buenos días' : hora < 18 ? '¡Buenas tardes' : '¡Buenas noches';
+  const idx = now.getDate() % verses.length;
+  const v   = verses[idx];
 
   el.innerHTML = `
     <div class="mb-2">
-      <h2 style="font-size:1.5rem;font-weight:800">${greeting}, Luismi! 🙏</h2>
-      <p class="text-muted" style="font-size:0.85rem;margin-top:4px">
+      <h2 style="font-size:1.4rem;font-weight:800">${greeting}, Luismi! 🙏</h2>
+      <p class="text-muted" style="font-size:0.82rem;margin-top:4px">
         ${now.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long', year:'numeric' })}
       </p>
     </div>
 
-    <!-- Versículo destacado -->
-    <div class="card mb-2" style="border-left:3px solid var(--neon-purple);background:var(--bg-hover)">
-      <p style="font-style:italic;color:var(--text-secondary);font-size:0.9rem" id="dashVerse"></p>
-      <span style="color:var(--neon-purple);font-size:0.8rem;font-weight:700" id="dashRef"></span>
+    <!-- Versículo -->
+    <div class="card mb-2" style="border-left:3px solid var(--neon-purple)">
+      <p style="font-style:italic;color:var(--text-secondary);font-size:0.88rem;line-height:1.6">
+        ${v.text}
+      </p>
+      <span style="color:var(--neon-purple);font-size:0.8rem;font-weight:700">${v.ref}</span>
     </div>
 
     <!-- Stats -->
@@ -271,7 +285,7 @@ async function renderDashboard() {
       <div class="stat-card mod-spiritual-bg">
         <div class="stat-icon">✝️</div>
         <div class="stat-value mod-spiritual">${spiritual}</div>
-        <div class="stat-label">Entradas espirituales</div>
+        <div class="stat-label">Espiritual</div>
       </div>
       <div class="stat-card mod-economic-bg">
         <div class="stat-icon">💰</div>
@@ -281,29 +295,22 @@ async function renderDashboard() {
       <div class="stat-card mod-academic-bg">
         <div class="stat-icon">📚</div>
         <div class="stat-value mod-academic">${tasks}</div>
-        <div class="stat-label">Tareas académicas</div>
+        <div class="stat-label">Tareas</div>
       </div>
       <div class="stat-card mod-fitness-bg">
         <div class="stat-icon">💪</div>
         <div class="stat-value mod-fitness">${workouts}</div>
-        <div class="stat-label">Entrenamientos</div>
+        <div class="stat-label">Entrenos</div>
       </div>
     </div>
 
     <!-- Accesos rápidos -->
-    <h3 class="mb-1" style="color:var(--text-secondary);font-size:0.85rem;text-transform:uppercase;letter-spacing:1px">
-      Acceso rápido
-    </h3>
+    <h3 style="color:var(--text-muted);font-size:0.82rem;text-transform:uppercase;
+      letter-spacing:1px;margin-bottom:0.8rem">Acceso rápido</h3>
     <div class="card-grid">
       ${quickLinks()}
     </div>
   `;
-
-  // Poner versículo en dashboard
-  const idx = now.getDate() % verses.length;
-  const v = verses[idx];
-  document.getElementById('dashVerse').textContent = v.text;
-  document.getElementById('dashRef').textContent   = v.ref;
 }
 
 function quickLinks() {
@@ -315,15 +322,15 @@ function quickLinks() {
     { page: 'notes',     icon: '📝', label: 'Notas',         color: 'var(--color-notes)',     desc: 'Apuntes y reflexiones' },
     { page: 'goals',     icon: '🎯', label: 'Metas',         color: 'var(--color-goals)',     desc: 'Tus objetivos de vida' },
     { page: 'reminders', icon: '🔔', label: 'Recordatorios', color: 'var(--color-reminders)', desc: 'Alarmas y hábitos diarios' },
-    { page: 'settings',  icon: '⚙️', label: 'Ajustes',       color: 'var(--text-muted)',      desc: 'Configurar Supabase' },
+    { page: 'settings',  icon: '⚙️', label: 'Ajustes',       color: 'var(--text-muted)',      desc: 'Configurar la app' },
   ];
 
   return links.map(l => `
     <div class="card" style="cursor:pointer;border-top:3px solid ${l.color}"
          onclick="navigateTo('${l.page}')">
-      <div style="font-size:1.6rem;margin-bottom:6px">${l.icon}</div>
-      <div style="font-weight:700;color:${l.color};margin-bottom:4px">${l.label}</div>
-      <div style="font-size:0.78rem;color:var(--text-muted)">${l.desc}</div>
+      <div style="font-size:1.5rem;margin-bottom:6px">${l.icon}</div>
+      <div style="font-weight:700;color:${l.color};margin-bottom:4px;font-size:0.95rem">${l.label}</div>
+      <div style="font-size:0.76rem;color:var(--text-muted)">${l.desc}</div>
     </div>
   `).join('');
 }
@@ -332,11 +339,8 @@ function quickLinks() {
 function init() {
   setDate();
   setDailyVerse();
-
-  // Restaurar última página visitada
-  const last = localStorage.getItem('lastPage') || 'dashboard';
-  navigateTo(last);
+  // Siempre arrancar en dashboard
+  navigateTo('dashboard');
 }
 
-// Arrancar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', init);
