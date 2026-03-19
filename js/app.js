@@ -244,6 +244,38 @@ function showToast(msg, type = 'success') {
   toastTimer = setTimeout(() => toastEl.classList.remove('show'), 3000);
 }
 
+/* ---- PWA INSTALL ---- */
+let deferredPrompt = null;
+
+// 1. Captura el evento — solo Android/Chrome lo dispara
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Mostrar botón de instalar
+  const btn = document.getElementById('pwaInstallBtn');
+  if (btn) btn.style.display = 'flex';
+});
+
+// 2. Cuando ya está instalada — ocultar botón
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  const btn = document.getElementById('pwaInstallBtn');
+  if (btn) btn.style.display = 'none';
+  showToast('🎉 ¡LuismiLife instalada!');
+});
+
+async function installPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    showToast('🎉 ¡Instalando LuismiLife!');
+  }
+  deferredPrompt = null;
+  const btn = document.getElementById('pwaInstallBtn');
+  if (btn) btn.style.display = 'none';
+}
+
 /* ---- DASHBOARD ---- */
 async function renderDashboard() {
   const el = document.getElementById('page-dashboard');
@@ -279,24 +311,6 @@ async function renderDashboard() {
       <span style="color:var(--neon-purple);font-size:0.8rem;font-weight:700">${v.ref}</span>
     </div>
 
-    <!-- Banner instalar PWA -->
-    <div id="pwaBanner" style="display:none;background:linear-gradient(135deg,#7c3aed22,#06b6d422);
-      border:1px solid var(--neon-purple);border-radius:var(--radius);padding:1rem;
-      margin-bottom:1.2rem;display:flex;align-items:center;gap:12px">
-      <span style="font-size:1.6rem">📲</span>
-      <div style="flex:1">
-        <p style="font-weight:700;color:var(--text-primary);font-size:0.9rem">
-          Instala LuismiLife
-        </p>
-        <p style="font-size:0.78rem;color:var(--text-muted)">
-          Agrégala a tu pantalla de inicio para acceso rápido
-        </p>
-      </div>
-      <button class="btn btn-primary btn-sm" id="pwaInstallBtn" onclick="installPWA()">
-        Instalar
-      </button>
-    </div>
-
     <!-- Stats -->
     <div class="stats-grid mb-2">
       <div class="stat-card mod-spiritual-bg">
@@ -328,9 +342,6 @@ async function renderDashboard() {
       ${quickLinks()}
     </div>
   `;
-
-  // Mostrar banner PWA si está disponible
-  showPWABanner();
 }
 
 function quickLinks() {
@@ -352,87 +363,6 @@ function quickLinks() {
       <div style="font-size:0.76rem;color:var(--text-muted)">${l.desc}</div>
     </div>
   `).join('');
-}
-
-/* ---- PWA INSTALL ---- */
-let deferredPrompt = null;
-
-// Capturar el evento antes de que el navegador lo muestre
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  showPWABanner();
-
-  // Mostrar también botón flotante
-  const fab = document.getElementById('pwaFab');
-  if (fab) fab.style.display = 'flex';
-});
-
-// Cuando ya está instalada
-window.addEventListener('appinstalled', () => {
-  deferredPrompt = null;
-  const fab    = document.getElementById('pwaFab');
-  const banner = document.getElementById('pwaBanner');
-  if (fab)    fab.style.display    = 'none';
-  if (banner) banner.style.display = 'none';
-  showToast('🎉 ¡LuismiLife instalada correctamente!');
-});
-
-function showPWABanner() {
-  const banner = document.getElementById('pwaBanner');
-  if (banner && deferredPrompt) {
-    banner.style.display = 'flex';
-  }
-}
-
-async function installPWA() {
-  if (!deferredPrompt) {
-    // En iOS mostrar instrucciones manuales
-    openModal('📲 Instalar LuismiLife', `
-      <div style="text-align:center;padding:0.5rem 0">
-        <div style="font-size:3rem;margin-bottom:1rem">📲</div>
-        <p style="font-weight:700;color:var(--text-primary);margin-bottom:0.8rem">
-          Instala en tu iPhone / iPad
-        </p>
-        <div style="text-align:left;display:flex;flex-direction:column;gap:0.8rem">
-          <div style="display:flex;align-items:center;gap:10px;background:var(--bg-hover);
-            padding:0.8rem;border-radius:var(--radius-sm)">
-            <span style="font-size:1.4rem">1️⃣</span>
-            <p style="font-size:0.85rem;color:var(--text-secondary)">
-              Toca el botón <strong style="color:var(--neon-cyan)">Compartir</strong> 
-              (el cuadro con flecha) en Safari
-            </p>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:var(--bg-hover);
-            padding:0.8rem;border-radius:var(--radius-sm)">
-            <span style="font-size:1.4rem">2️⃣</span>
-            <p style="font-size:0.85rem;color:var(--text-secondary)">
-              Busca <strong style="color:var(--neon-cyan)">"Agregar a pantalla de inicio"</strong>
-            </p>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:var(--bg-hover);
-            padding:0.8rem;border-radius:var(--radius-sm)">
-            <span style="font-size:1.4rem">3️⃣</span>
-            <p style="font-size:0.85rem;color:var(--text-secondary)">
-              Toca <strong style="color:var(--neon-cyan)">"Agregar"</strong> arriba a la derecha
-            </p>
-          </div>
-        </div>
-        <div class="modal-footer" style="margin-top:1rem">
-          <button class="btn btn-primary w-full" onclick="closeModal()">Entendido ✓</button>
-        </div>
-      </div>
-    `);
-    return;
-  }
-
-  // Android / Chrome — instalación nativa
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  if (outcome === 'accepted') {
-    showToast('🎉 ¡Instalando LuismiLife!');
-  }
-  deferredPrompt = null;
 }
 
 /* ---- INIT ---- */
