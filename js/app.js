@@ -201,7 +201,7 @@ function handleImport(e) {
   }
 /* =============================================
    LuismiLife — app.js (Parte 2)
-   Modal global, Toast, Dashboard, Init
+   Modal global, Toast, Dashboard, PWA, Init
    ============================================= */
 
 /* ---- MODAL GLOBAL ---- */
@@ -234,7 +234,7 @@ const toastMsg = document.getElementById('toastMsg');
 let toastTimer = null;
 
 function showToast(msg, type = 'success') {
-  toastMsg.textContent    = msg;
+  toastMsg.textContent      = msg;
   toastEl.style.borderColor = type === 'error' ? '#f87171' : 'var(--neon-green)';
   toastEl.style.color       = type === 'error' ? '#f87171' : 'var(--neon-green)';
   toastEl.style.boxShadow   = type === 'error'
@@ -249,14 +249,13 @@ async function renderDashboard() {
   const el = document.getElementById('page-dashboard');
   el.innerHTML = `<p class="loading-text"><i class="fa fa-spinner fa-spin"></i> Cargando...</p>`;
 
-  // Conteos locales
   const spiritual    = DB.spiritual.getAll().length;
   const transactions = DB.economic.getAll().length;
   const tasks        = DB.academic.getTasks().length;
   const workouts     = DB.fitness.getWorkouts().length;
 
-  const now     = new Date();
-  const hora    = now.getHours();
+  const now      = new Date();
+  const hora     = now.getHours();
   const greeting = hora < 12 ? '¡Buenos días'
                  : hora < 18 ? '¡Buenas tardes'
                  : '¡Buenas noches';
@@ -268,7 +267,7 @@ async function renderDashboard() {
     <div class="mb-2">
       <h2 style="font-size:1.4rem;font-weight:800">${greeting}, Luismi! 🙏</h2>
       <p class="text-muted" style="font-size:0.82rem;margin-top:4px">
-        ${now.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long', year:'numeric' })}
+        ${now.toLocaleDateString('es-ES', {weekday:'long',day:'numeric',month:'long',year:'numeric'})}
       </p>
     </div>
 
@@ -278,6 +277,24 @@ async function renderDashboard() {
         ${v.text}
       </p>
       <span style="color:var(--neon-purple);font-size:0.8rem;font-weight:700">${v.ref}</span>
+    </div>
+
+    <!-- Banner instalar PWA -->
+    <div id="pwaBanner" style="display:none;background:linear-gradient(135deg,#7c3aed22,#06b6d422);
+      border:1px solid var(--neon-purple);border-radius:var(--radius);padding:1rem;
+      margin-bottom:1.2rem;display:flex;align-items:center;gap:12px">
+      <span style="font-size:1.6rem">📲</span>
+      <div style="flex:1">
+        <p style="font-weight:700;color:var(--text-primary);font-size:0.9rem">
+          Instala LuismiLife
+        </p>
+        <p style="font-size:0.78rem;color:var(--text-muted)">
+          Agrégala a tu pantalla de inicio para acceso rápido
+        </p>
+      </div>
+      <button class="btn btn-primary btn-sm" id="pwaInstallBtn" onclick="installPWA()">
+        Instalar
+      </button>
     </div>
 
     <!-- Stats -->
@@ -311,6 +328,9 @@ async function renderDashboard() {
       ${quickLinks()}
     </div>
   `;
+
+  // Mostrar banner PWA si está disponible
+  showPWABanner();
 }
 
 function quickLinks() {
@@ -324,7 +344,6 @@ function quickLinks() {
     { page: 'reminders', icon: '🔔', label: 'Recordatorios', color: 'var(--color-reminders)', desc: 'Alarmas y hábitos diarios' },
     { page: 'settings',  icon: '⚙️', label: 'Ajustes',       color: 'var(--text-muted)',      desc: 'Configurar la app' },
   ];
-
   return links.map(l => `
     <div class="card" style="cursor:pointer;border-top:3px solid ${l.color}"
          onclick="navigateTo('${l.page}')">
@@ -335,11 +354,91 @@ function quickLinks() {
   `).join('');
 }
 
+/* ---- PWA INSTALL ---- */
+let deferredPrompt = null;
+
+// Capturar el evento antes de que el navegador lo muestre
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  showPWABanner();
+
+  // Mostrar también botón flotante
+  const fab = document.getElementById('pwaFab');
+  if (fab) fab.style.display = 'flex';
+});
+
+// Cuando ya está instalada
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  const fab    = document.getElementById('pwaFab');
+  const banner = document.getElementById('pwaBanner');
+  if (fab)    fab.style.display    = 'none';
+  if (banner) banner.style.display = 'none';
+  showToast('🎉 ¡LuismiLife instalada correctamente!');
+});
+
+function showPWABanner() {
+  const banner = document.getElementById('pwaBanner');
+  if (banner && deferredPrompt) {
+    banner.style.display = 'flex';
+  }
+}
+
+async function installPWA() {
+  if (!deferredPrompt) {
+    // En iOS mostrar instrucciones manuales
+    openModal('📲 Instalar LuismiLife', `
+      <div style="text-align:center;padding:0.5rem 0">
+        <div style="font-size:3rem;margin-bottom:1rem">📲</div>
+        <p style="font-weight:700;color:var(--text-primary);margin-bottom:0.8rem">
+          Instala en tu iPhone / iPad
+        </p>
+        <div style="text-align:left;display:flex;flex-direction:column;gap:0.8rem">
+          <div style="display:flex;align-items:center;gap:10px;background:var(--bg-hover);
+            padding:0.8rem;border-radius:var(--radius-sm)">
+            <span style="font-size:1.4rem">1️⃣</span>
+            <p style="font-size:0.85rem;color:var(--text-secondary)">
+              Toca el botón <strong style="color:var(--neon-cyan)">Compartir</strong> 
+              (el cuadro con flecha) en Safari
+            </p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--bg-hover);
+            padding:0.8rem;border-radius:var(--radius-sm)">
+            <span style="font-size:1.4rem">2️⃣</span>
+            <p style="font-size:0.85rem;color:var(--text-secondary)">
+              Busca <strong style="color:var(--neon-cyan)">"Agregar a pantalla de inicio"</strong>
+            </p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--bg-hover);
+            padding:0.8rem;border-radius:var(--radius-sm)">
+            <span style="font-size:1.4rem">3️⃣</span>
+            <p style="font-size:0.85rem;color:var(--text-secondary)">
+              Toca <strong style="color:var(--neon-cyan)">"Agregar"</strong> arriba a la derecha
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer" style="margin-top:1rem">
+          <button class="btn btn-primary w-full" onclick="closeModal()">Entendido ✓</button>
+        </div>
+      </div>
+    `);
+    return;
+  }
+
+  // Android / Chrome — instalación nativa
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    showToast('🎉 ¡Instalando LuismiLife!');
+  }
+  deferredPrompt = null;
+}
+
 /* ---- INIT ---- */
 function init() {
   setDate();
   setDailyVerse();
-  // Siempre arrancar en dashboard
   navigateTo('dashboard');
 }
 
