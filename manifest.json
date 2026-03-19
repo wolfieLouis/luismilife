@@ -10,13 +10,13 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/luismilife/icons/icon-192.png",
+      "src": "https://via.placeholder.com/192x192/7c3aed/ffffff?text=L",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/luismilife/icons/icon-512.png",
+      "src": "https://via.placeholder.com/512x512/7c3aed/ffffff?text=L",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
