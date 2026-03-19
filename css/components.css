@@ -1,0 +1,322 @@
+/* =============================================
+   LuismiLife — components.css
+   Modal, Stats, Items de lista, Colores módulos
+   ============================================= */
+
+/* ---- MODAL ---- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #00000099;
+  backdrop-filter: blur(3px);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-neon);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 40px var(--neon-purple-glow);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalIn 0.25s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.modal-close {
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1rem;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.modal-close:hover {
+  color: #f87171;
+  background: #f8717122;
+}
+
+.modal-body {
+  padding: 1.4rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+}
+
+/* ---- STAT CARDS (dashboard) ---- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  transition: var(--transition);
+}
+
+.stat-card:hover {
+  border-color: var(--border-neon);
+}
+
+.stat-icon {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ---- LIST ITEMS (para todos los módulos) ---- */
+.list-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  transition: var(--transition);
+  margin-bottom: 0.6rem;
+}
+
+.list-item:hover {
+  border-color: var(--border-neon);
+}
+
+.list-item-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.list-item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-item-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-item-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.list-item-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* ---- COLORES POR MÓDULO ---- */
+
+/* Espiritual */
+.mod-spiritual { color: var(--color-spiritual); }
+.mod-spiritual-bg { background: #a78bfa22; border-color: #a78bfa44; }
+.mod-spiritual .progress-bar { background: var(--color-spiritual); }
+
+/* Económico */
+.mod-economic { color: var(--color-economic); }
+.mod-economic-bg { background: #34d39922; border-color: #34d39944; }
+.mod-economic .progress-bar { background: var(--color-economic); }
+
+/* Académico */
+.mod-academic { color: var(--color-academic); }
+.mod-academic-bg { background: #60a5fa22; border-color: #60a5fa44; }
+.mod-academic .progress-bar { background: var(--color-academic); }
+
+/* Fitness */
+.mod-fitness { color: var(--color-fitness); }
+.mod-fitness-bg { background: #fb923c22; border-color: #fb923c44; }
+.mod-fitness .progress-bar { background: var(--color-fitness); }
+
+/* Notas */
+.mod-notes { color: var(--color-notes); }
+.mod-notes-bg { background: #fbbf2422; border-color: #fbbf2444; }
+
+/* Metas */
+.mod-goals { color: var(--color-goals); }
+.mod-goals-bg { background: #f472b622; border-color: #f472b644; }
+
+/* Recordatorios */
+.mod-reminders { color: var(--color-reminders); }
+.mod-reminders-bg { background: #38bdf822; border-color: #38bdf844; }
+
+/* ---- CATEGORY CHIPS ---- */
+.chip-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 1rem;
+}
+
+.chip {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.chip.active,
+.chip:hover {
+  background: var(--neon-purple);
+  color: #fff;
+  border-color: var(--neon-purple);
+}
+
+/* ---- PRIORITY BADGES ---- */
+.priority-alta   { background: #f8717122; color: #f87171; }
+.priority-media  { background: #fbbf2422; color: #fbbf24; }
+.priority-baja   { background: #34d39922; color: #34d399; }
+
+/* ---- TOGGLE (checkbox estilo neon) ---- */
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.toggle {
+  width: 42px;
+  height: 24px;
+  background: var(--border);
+  border-radius: 20px;
+  position: relative;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.toggle.on {
+  background: var(--neon-purple);
+  box-shadow: 0 0 10px var(--neon-purple-glow);
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: var(--transition);
+}
+
+.toggle.on::after {
+  left: 21px;
+}
+
+/* ---- INCOME / EXPENSE ---- */
+.amount-income  { color: var(--neon-green); font-weight: 700; }
+.amount-expense { color: #f87171; font-weight: 700; }
+
+/* ---- STREAK BADGE ---- */
+.streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--neon-orange);
+}
+
+/* ---- ANSWERED PRAYER ---- */
+.answered {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+/* ---- PINNED NOTE ---- */
+.pinned-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--neon-yellow);
+  box-shadow: 0 0 8px var(--neon-yellow);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+/* ---- RESPONSIVE AJUSTES ---- */
+@media (min-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .modal {
+    max-height: 85vh;
+  }
+
+  .list-item-title {
+    font-size: 0.88rem;
+  }
+
+  .stat-value {
+    font-size: 1.3rem;
+  }
+}
